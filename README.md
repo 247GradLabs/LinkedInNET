@@ -4,17 +4,21 @@
 LinkedInNET
 ===========
 
-[Sparkle.LinkedInNET](https://github.com/SparkleNetworks/LinkedInNET/) ([NuGet](https://www.nuget.org/packages/Sparkle.LinkedInNET/))will help you query the LinkedIn API :)
+[Sparkle.LinkedInNET](https://github.com/SparkleNetworks/LinkedInNET/) ([NuGet](https://www.nuget.org/packages/Sparkle.LinkedInNET/)) will help you query the LinkedIn API :)
+
+[THIS FORK](https://github.com/247GradLabs/LinkedInNET) you are viewing now aims at supporting the new V2 API. See [this issue](https://github.com/SparkleNetworks/LinkedInNET/issues/23) for more information. 
+
+**Issues on V1** can be declared on the original repo. **Issues on V2** can be declared on this fork.
 
 Have any question? You may reach the authors on the dedicated chat room: [![Join the chat at https://gitter.im/SparkleNetworks/LinkedInNET](https://badges.gitter.im/Join%20Chat.svg)](https://gitter.im/SparkleNetworks/LinkedInNET?utm_source=badge&utm_medium=badge&utm_campaign=pr-badge&utm_content=badge)
 
 Motivation
 ------------
 
-Bring the .NET world a nice LinkedIn client library.
+Bring the .NET world a nice LinkedIn client library. + support both V1 and V2 APIs.
 
 
-Before you start - About LinkedIn API recent changes
+Before you start - About LinkedIn V1 API recent changes
 ----------------------------------------------------------------
 
 **[LinkedIn recently changed a lot of things in its developer program](https://developer.linkedin.com/blog/posts/2015/developer-program-changes). When using this API, your applications might break on May 12, 2015**. 
@@ -48,7 +52,7 @@ Usage
 [Via NuGet](https://www.nuget.org/packages/Sparkle.LinkedInNET/)
 
 ````powershell
-PM> Install-Package Sparkle.LinkedInNET
+PM> Install-Package --this-fork-is-not-yet-published--
 ````
 
 Or build the sources... You have to create your own .snk file.
@@ -210,7 +214,7 @@ https://developer.linkedin.com/apis
 https://developer.linkedin.com/documents/authentication  
 
 
-.NET version
+.NET versions
 ------------
 
 Supported .NET Framework versions:
