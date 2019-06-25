@@ -1,5 +1,4 @@
-﻿
-namespace Sparkle.LinkedInNET.DemoMvc5.Controllers
+﻿namespace Sparkle.LinkedInNET.DemoMvc5.Controllers
 {
     using System;
     using System.Collections.Generic;
@@ -14,6 +13,8 @@ namespace Sparkle.LinkedInNET.DemoMvc5.Controllers
     using Sparkle.LinkedInNET.Profiles;
     using System.Threading.Tasks;
     using Sparkle.LinkedInNET.Organizations;
+    using System.Net;
+    using System.Text.RegularExpressions;
 
     ////using Sparkle.LinkedInNET.ServiceDefinition;
 
@@ -32,6 +33,8 @@ namespace Sparkle.LinkedInNET.DemoMvc5.Controllers
 
         public async Task<ActionResult> Index(string culture = "en-US")
         {
+            ServicePointManager.SecurityProtocol = SecurityProtocolType.Tls12;
+
             // step 1: configuration
             this.ViewBag.Configuration = this.apiConfig;
             
@@ -49,7 +52,7 @@ namespace Sparkle.LinkedInNET.DemoMvc5.Controllers
             {
                 this.ViewBag.Url = null;
             }
-
+                       
             // step 3
             if (this.data.HasAccessToken)
             {
@@ -67,23 +70,41 @@ namespace Sparkle.LinkedInNET.DemoMvc5.Controllers
                         .WithAllFields();
                     var profile = await this.api.Profiles.GetMyProfileAsync(user, acceptLanguages, fields);
 
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
                     // var profile1 =  this.api.Profiles.GetMyProfile(user, acceptLanguages, fields);
 
 
-                    var firstName = profile.FirstName.Localized.First.ToObject<string>();
-                    var firstName1 = profile.FirstName.Localized.First.Last.ToString();
-                    var firstName2 = profile.FirstName.Localized.First.ToObject<string>();
+                    //var firstName = profile.FirstName.Localized.First.ToObject<string>();
+                    //var firstName1 = profile.FirstName.Localized.First.Last.ToString();
+                    //var firstName2 = profile.FirstName.Localized.First.ToObject<string>();
 
-                    var fieldsOrg = FieldSelector.For<OrganizationalEntityAcls>()
-                        .WithAllFields();
-                    var userCompanies = this.api.Organizations.GetUserAdminApprOrganizations(user, fieldsOrg);
+                    //var fieldsOrg = FieldSelector.For<OrganizationalEntityAcls>()
+                    //    .WithAllFields();
+                    //var userCompanies = this.api.Organizations.GetUserAdminApprOrganizations(user, fieldsOrg);
 
 
-                    var statistic = this.api.Shares.GetShareStatistics(user, "18568129", "6386953337324994560");
+                    //var statistic = this.api.Shares.GetShareStatistics(user, "18568129", "6386953337324994560");
 
-                    var orgFollorerStatistic = this.api.Organizations.GetOrgFollowerStatistics(user, "18568129");
+                    //var orgFollorerStatistic = this.api.Organizations.GetOrgFollowerStatistics(user, "18568129");
 
-                    var getShares = this.api.Shares.GetShares(user, "urn:li:organization:18568129", 1000, 5, 0);
+                    //var getShares = this.api.Shares.GetShares(user, "urn:li:organization:18568129", 1000, 5, 0);
 
                     //var postResult = this.api.Shares.Post(user, new Common.PostShare()
                     //{
@@ -91,11 +112,12 @@ namespace Sparkle.LinkedInNET.DemoMvc5.Controllers
                     //    {
                     //        Title = "tttt",
                     //        ContentEntities = new List<Common.PostShareContentEntities>() { new Common.PostShareContentEntities() {
-                    //                  EntityLocation = "https://www.example.com/",
-                    //                  Thumbnails = new List<Common.PostShareContentThumbnails>(){new Common.PostShareContentThumbnails()
-                    //                  {
-                    //                      ResolvedUrl = "http://wac.2f9ad.chicdn.net/802F9AD/u/joyent.wme/public/wme/assets/ec050984-7b81-11e6-96e0-8905cd656caf.jpg?v=30"
-                    //                  } }
+                    //                  //EntityLocation = "https://www.example.com/",
+                    //                  //Thumbnails = new List<Common.PostShareContentThumbnails>(){new Common.PostShareContentThumbnails()
+                    //                  //{
+                    //                  //    ResolvedUrl = "http://wac.2f9ad.chicdn.net/802F9AD/u/joyent.wme/public/wme/assets/ec050984-7b81-11e6-96e0-8905cd656caf.jpg?v=30"
+                    //                  //} }
+                    //                  Entity = postId.Location
                     //              }
                     //          }
                     //    },
@@ -111,7 +133,8 @@ namespace Sparkle.LinkedInNET.DemoMvc5.Controllers
                     //    {
                     //        Text = "text"
                     //    },
-                    //    Owner = "urn:li:person:" + "123456789"
+                    //    // Owner = "urn:li:person:" + "123456789"
+                    //    Owner = "urn:li:organization:18568129",
                     //}
                     //);
 
@@ -134,6 +157,35 @@ namespace Sparkle.LinkedInNET.DemoMvc5.Controllers
             }
 
             return this.View();
+        }
+
+        public static byte[] DownladFromUrlToByte(string url)
+        {
+            HttpWebRequest req;
+            HttpWebResponse res = null;
+
+            try
+            {
+                req = (HttpWebRequest)WebRequest.Create(url);
+                res = (HttpWebResponse)req.GetResponse();
+                Stream stream = res.GetResponseStream();
+
+                var buffer = new byte[4096];
+                using (MemoryStream ms = new MemoryStream())
+                {
+                    var bytesRead = 0;
+                    while ((bytesRead = stream.Read(buffer, 0, buffer.Length)) != 0)
+                    {
+                        ms.Write(buffer, 0, bytesRead);
+                    }
+                    return ms.ToArray();
+                }
+            }
+            finally
+            {
+                if (res != null)
+                    res.Close();
+            }
         }
 
         public async Task<ActionResult> OAuth2(string code, string state, string error, string error_description)

@@ -33,6 +33,8 @@ namespace Sparkle.LinkedInNET.Internals
                     return "w_messages";
                 case AuthorizationScope.WriteShare:
                     return "w_share";
+                case AuthorizationScope.ReadWriteOrganization:
+                    return "rw_organization";
                 default:
                     throw new NotSupportedException("Scope of value '" + scope.ToString() + " is not supported");
             }

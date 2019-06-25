@@ -69,5 +69,7 @@ namespace Sparkle.LinkedInNET.Internals
         public string[] AcceptLanguages { get; set; }
 
         public System.Net.WebHeaderCollection ResponseHeaders { get; set; }
+        
+        public string UploadUrl { get; set; }
     }
 }

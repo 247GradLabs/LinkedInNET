@@ -46,6 +46,18 @@ namespace Sparkle.LinkedInNET.ServiceDefinition
             set { this.useFieldSelectors = value; }
         }
 
+        [XmlAttribute]
+        public bool IsValueType { get; set; }
+
+        [XmlAttribute]
+        public bool IsStreamOctetResultHandeling { get; set; }
+
+        [XmlAttribute]
+        public bool IsIntResultHandeling { get; set; }
+
+        [XmlAttribute]
+        public bool IsUGCPostHandeling { get; set; }
+
         ////[XmlAttribute]
         ////public List<Field> QueryFields { get; set; }
 

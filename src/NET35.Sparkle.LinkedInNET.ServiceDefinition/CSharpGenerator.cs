@@ -237,6 +237,7 @@ namespace Sparkle.LinkedInNET.ServiceDefinition
             this.text.WriteLine(indent++, "{");
             this.WriteNamespace(indent, "System");
             this.WriteNamespace(indent, "System.Xml.Serialization");
+            this.WriteNamespace(indent, "System.Linq");
             this.WriteNamespace(indent, this.RootNamespace + ".Internals");
 
             foreach (var item in context.Root.ApiGroups)
@@ -285,12 +286,13 @@ namespace Sparkle.LinkedInNET.ServiceDefinition
             this.text.WriteLine(indent++, "{");
             this.WriteNamespace(indent, "System");
             this.WriteNamespace(indent, "System.Xml.Serialization");
-            this.text.WriteLine(--indent, "#if ASYNCTASKS");
+            //this.text.WriteLine(--indent, "#if ASYNCTASKS");
             indent++;
             this.WriteNamespace(indent, "System.Threading.Tasks");
-            this.text.WriteLine(--indent, "#endif");
+            //this.text.WriteLine(--indent, "#endif");
             indent++;
             this.WriteNamespace(indent, this.RootNamespace + ".Internals");
+            this.WriteNamespace(indent, "System.Linq");
             this.text.WriteLine();
             this.text.WriteLine(indent, "/// <summary>");
             this.text.WriteLine(indent, "/// Name: '" + apiGroup.Name + "'");
@@ -328,7 +330,14 @@ namespace Sparkle.LinkedInNET.ServiceDefinition
                     if (returnTypeType != null)
                     {
                         returnType = this.GetPropertyName(returnTypeType.ClassName, returnTypeType.Name);
-                        returnType = returnTypeType.ApiGroup + "." + returnType;
+                        if (method.IsValueType)
+                        {
+                            returnType = returnType.ToLower();
+                        }
+                        else
+                        {
+                            returnType = returnTypeType.ApiGroup + "." + returnType;
+                        }
                     }
                 }
 
@@ -340,7 +349,7 @@ namespace Sparkle.LinkedInNET.ServiceDefinition
                     if (postReturnTypeType != null)
                     {
                         postReturnType = this.GetPropertyName(postReturnTypeType.ClassName, postReturnTypeType.Name);
-                        postReturnType = postReturnTypeType.ApiGroup + "." + postReturnType;
+                        postReturnType = postReturnTypeType.ApiGroup + "." + postReturnType;                        
                     }
                 }
 
@@ -435,7 +444,18 @@ namespace Sparkle.LinkedInNET.ServiceDefinition
 
                 if (postReturnTypeType != null)
                 {
-                    this.text.WriteLine(indent, "this.CreateJsonPostStream(context, postData);");
+                    if (postReturnTypeType.IsMultiPartStream)
+                    {
+                        this.text.WriteLine(indent, "this.CreateMultiPartStream(context, postData);");
+                    }
+                    else if (postReturnTypeType.IsOctetStream)
+                    {
+                        this.text.WriteLine(indent, "this.CreateOctetStream(context, postData);");
+                    }
+                    else
+                    {
+                        this.text.WriteLine(indent, "this.CreateJsonPostStream(context, postData);");
+                    }
                 }
 
                 // body / execute
@@ -445,7 +465,38 @@ namespace Sparkle.LinkedInNET.ServiceDefinition
                 ////text.WriteLine(indent, "return this.HandleXmlResponse<" + returnType + ">(context);");
                 text.WriteLine(indent--, "this.HandleJsonErrorResponse(context);");
                 text.WriteLine(indent, "");
-                text.WriteLine(indent, "var result = this.HandleJsonResponse<" + returnType + ">(context);");
+                if (method.IsStreamOctetResultHandeling)
+                {                    
+                    text.WriteLine(indent, @"            
+                        var result = string.Empty;
+                        var headerETag = context.ResponseHeaders.GetValues(""eTag"");
+                        if (headerETag.Length > 0)
+                        {
+                            result = headerETag.First();
+                            result = result.TrimEnd('""').TrimStart('""');
+                        }"
+                    );
+                }
+                else if (method.IsUGCPostHandeling)
+                {
+                    text.WriteLine(indent, @"            
+                        var result = string.Empty;
+                        var headerETag = context.ResponseHeaders.GetValues(""X-RestLi-Id"");
+                        if (headerETag.Length > 0)
+                        {
+                            result = headerETag.First();
+                            result = result.TrimEnd('""').TrimStart('""');
+                        }"
+                    );
+                }
+                else if(method.IsIntResultHandeling)
+                {
+                    text.WriteLine(indent, "var result = (int)context.HttpStatusCode;");
+                }
+                else
+                {
+                    text.WriteLine(indent, "var result = this.HandleJsonResponse<" + returnType + ">(context);");
+                }
 
                 if (returnTypeType != null && returnTypeType.Headers != null)
                 {
@@ -468,7 +519,7 @@ namespace Sparkle.LinkedInNET.ServiceDefinition
 
 
                 this.text.WriteLine();
-                this.text.WriteLine(--indent, "#if ASYNCTASKS");
+                //this.text.WriteLine(--indent, "#if ASYNCTASKS");
                 indent++;
                 // doc
                 this.text.WriteLine(indent, "/// <summary>");
@@ -543,7 +594,18 @@ namespace Sparkle.LinkedInNET.ServiceDefinition
 
                 if (postReturnTypeType != null)
                 {
-                    this.text.WriteLine(indent, "this.CreateJsonPostStream(context, postData);");
+                    if (postReturnTypeType.IsMultiPartStream)
+                    {
+                        this.text.WriteLine(indent, "this.CreateMultiPartStream(context, postData);");
+                    }
+                    else if(postReturnTypeType.IsOctetStream)
+                    {
+                        this.text.WriteLine(indent, "this.CreateOctetStream(context, postData);");
+                    }
+                    else
+                    {
+                        this.text.WriteLine(indent, "this.CreateJsonPostStream(context, postData);");
+                    }
                 }
 
                 // body / execute
@@ -554,7 +616,38 @@ namespace Sparkle.LinkedInNET.ServiceDefinition
                 ////text.WriteLine(indent, "return this.HandleXmlResponse<" + returnType + ">(context);");
                 text.WriteLine(indent--, "this.HandleJsonErrorResponse(context);");
                 text.WriteLine(indent, "");
-                text.WriteLine(indent, "var result = this.HandleJsonResponse<" + returnType + ">(context);");
+                if (method.IsStreamOctetResultHandeling)
+                {
+                    text.WriteLine(indent, @"            
+                        var result = string.Empty;
+                        var headerETag = context.ResponseHeaders.GetValues(""eTag"");
+                        if (headerETag.Length > 0)
+                        {
+                            result = headerETag.First();
+                            result = result.TrimEnd('""').TrimStart('""');
+                        }"
+                    );
+                }
+                else if (method.IsUGCPostHandeling)
+                {
+                    text.WriteLine(indent, @"            
+                        var result = string.Empty;
+                        var headerETag = context.ResponseHeaders.GetValues(""X-RestLi-Id"");
+                        if (headerETag.Length > 0)
+                        {
+                            result = headerETag.First();
+                            result = result.TrimEnd('""').TrimStart('""');
+                        }"
+                    );
+                }
+                else if (method.IsIntResultHandeling)
+                {
+                    text.WriteLine(indent, "var result = (int)context.HttpStatusCode;");
+                }
+                else
+                {
+                    text.WriteLine(indent, "var result = this.HandleJsonResponse<" + returnType + ">(context);");
+                }
 
                 if (returnTypeType != null && returnTypeType.Headers != null)
                 {
@@ -573,7 +666,7 @@ namespace Sparkle.LinkedInNET.ServiceDefinition
 
                 ////this.text.WriteLine(indent, "throw new NotImplementedException(url);");
                 this.text.WriteLine(--indent, "}");
-                this.text.WriteLine(--indent, "#endif");
+                //this.text.WriteLine(--indent, "#endif");
                 indent++;
                 
                 
@@ -672,7 +765,7 @@ namespace Sparkle.LinkedInNET.ServiceDefinition
 
                 var xmlAttribute = item.IsAttribute ? "XmlAttribute" : "XmlElement";
                 var xmlAttributeNameProp = item.IsAttribute ? "AttributeName" : "ElementName";
-                var jsonName = (item.IsAttribute ? "_" : "") + Namify(item.FieldName.ApiName, NameTransformation.PascalCase);
+                var jsonName = (item.IsAttribute ? "_" : "") + item.FieldName.ApiName; // Namify(item.FieldName.ApiName, NameTransformation.PascalCase);
                 //if (item.IsCollection)
                 //    jsonName = "values";
 

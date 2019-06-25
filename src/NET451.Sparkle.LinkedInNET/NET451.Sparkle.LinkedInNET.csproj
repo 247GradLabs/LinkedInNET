@@ -125,6 +125,7 @@
     <Compile Include="..\NET35.Sparkle.LinkedInNET\UserAuthorization.cs">
       <Link>UserAuthorization.cs</Link>
     </Compile>
+    <Compile Include="Video\VideoUpload.cs" />
     <Compile Include="OAuth2\OAuth2Api.Async.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
   </ItemGroup>
