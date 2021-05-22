@@ -1,4 +1,12 @@
 
+**Circleboom's note**
+----------------------------------------------------------------
+**This project is .net 5 upgraded version of [Sparkle.LinkedInNET](https://github.com/247GradLabs/LinkedInNET/).**
+
+The demoMVC and Test projects had to be deleted as they're not compatible with .Net 5 does not support these two. The test project should be re-written from scratch.
+
+----------------------------------------------------------------
+
 ![](https://raw.githubusercontent.com/SparkleNetworks/LinkedInNET/master/src/LiNET-200.png)
 
 LinkedInNET
